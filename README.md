@@ -2,13 +2,9 @@
 ======
 
 ![GrowingIO](https://www.growingio.com/vassets/images/home_v3/gio-logo-primary.svg)  
-
 [![CI](https://github.com/growingio/growingio-sdk-ios-advertising/workflows/CI/badge.svg)](https://github.com/growingio/growingio-sdk-ios-advertising/actions)
-
 [![GitHub](https://img.shields.io/github/license/growingio/growingio-sdk-ios-advertising)](https://github.com/growingio/growingio-sdk-ios-advertising/blob/master/LICENSE)
-
 [![Platform iOS](https://img.shields.io/badge/platform-iOS-brightgreen)]()
-
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
 

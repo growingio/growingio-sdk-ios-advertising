@@ -48,17 +48,27 @@
 @property (nonatomic, assign) BOOL isAlreadySendActivate;
 @property (nonatomic, copy) NSString *userAgent;
 @property (nonatomic, strong) NSDictionary *externParam;
+@property (nonatomic, copy) NSString *urlScheme;
 @end
 
 @implementation GrowingAdvertising
 
 static GrowingAdvertising *advertisingObj = nil;
 
-+ (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration {
++ (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
+                     urlScheme:(NSString *)urlScheme {
+    [self startWithConfiguration:configuration urlScheme:urlScheme callback:nil];
+}
+
++ (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
+                     urlScheme:(NSString *)urlScheme
+                      callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         if (!advertisingObj) {
             advertisingObj = [[GrowingAdvertising alloc] init];
+            advertisingObj.urlScheme = urlScheme;
+            advertisingObj.deeplinkHandler = handler;
             [[GrowingEventManager shareInstance] addInterceptor:advertisingObj];
             [[GrowingAppLifecycle sharedInstance] addAppLifecycleDelegate:advertisingObj];
             [[GrowingDeepLinkHandler sharedInstance] addHandlersObject:advertisingObj];
@@ -95,7 +105,15 @@ static GrowingAdvertising *advertisingObj = nil;
     return NO;
 }
 
+- (void)doDeeplinkByUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler{
+    [self growingHandlerUrl:url callback:handler];
+}
+
 - (BOOL)growingHandlerUrl:(NSURL *)url {
+    return [self growingHandlerUrl:url callback:nil];
+}
+
+- (BOOL)growingHandlerUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler{
     if (!url || !self.configuration.projectId) {
         return NO;
     }
@@ -135,7 +153,7 @@ static GrowingAdvertising *advertisingObj = nil;
                 GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(params);
                 [self postEventBuidler:builder];
                 
-                if (self.deeplinkHandler) {
+                if (handler || self.deeplinkHandler) {
                     // 处理参数回调
                     NSMutableDictionary *dictInfo = [NSMutableDictionary dictionaryWithDictionary:dict];
                     if ([dictInfo objectForKey:@"_gio_var"]) {
@@ -150,8 +168,11 @@ static GrowingAdvertising *advertisingObj = nil;
                         // 默认错误
                         err = [NSError errorWithDomain:@"com.growingio.deeplink" code:1 userInfo:@{@"error" : @"no custom_params"}];
                     }
-                    
-                    if (self.deeplinkHandler) {
+                    if (handler) {
+                        NSDate *endDate = [NSDate date];
+                        NSTimeInterval processTime = [endDate timeIntervalSinceDate:startData];
+                        handler(dictInfo, processTime, err);
+                    }else if (self.deeplinkHandler) {
                         NSDate *endDate = [NSDate date];
                         NSTimeInterval processTime = [endDate timeIntervalSinceDate:startData];
                         self.deeplinkHandler(dictInfo, processTime, err);
@@ -177,7 +198,7 @@ static GrowingAdvertising *advertisingObj = nil;
             GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(dictM);
             [self postEventBuidler:builder];
             
-            if (self.deeplinkHandler) {
+            if (self.deeplinkHandler || handler) {
                 NSString *custom_params_str = params[@"custom_params"];
                 NSArray *pair = [custom_params_str componentsSeparatedByString:@"="];
                 if (pair.count > 1) {
@@ -202,7 +223,12 @@ static GrowingAdvertising *advertisingObj = nil;
                             // 默认错误
                             err = [NSError errorWithDomain:@"com.growingio.deeplink" code:1 userInfo:@{@"error" : @"no custom_params"}];
                         }
-                        self.deeplinkHandler(info, 0.0, err);
+                        if (handler) {
+                            handler(info, 0.0, err);
+                        } else if (self.deeplinkHandler) {
+                            self.deeplinkHandler(info, 0.0, err);
+                        }
+                        
                     }
                 }
             }
@@ -260,9 +286,8 @@ static GrowingAdvertising *advertisingObj = nil;
     if (self.isAlreadySendActivate) {
         return;
     }
-    
-    NSString *clipboardContent = [UIPasteboard generalPasteboard].string;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        NSString *clipboardContent = [UIPasteboard generalPasteboard].string;
         NSDictionary *clipboardDict = [self dictFromPastboard:clipboardContent];
         if (clipboardDict.count == 0) {
             if (block) block(nil);

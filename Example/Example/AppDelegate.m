@@ -32,7 +32,7 @@ static NSString *const kGrowingProjectId = @"91eaf9b283361032";
         [GrowingTrackConfiguration configurationWithProjectId:@"0a1b4118dd954ec3bcc69da5138bdb96"];
     configuration2.debugEnabled = YES;
 
-    [GrowingAdvertising startWithConfiguration:configuration2];
+    [GrowingAdvertising startWithConfiguration:configuration2 urlScheme:@"growing.bae230e3f4b1bfbd"];
     [GrowingAdvertising shareInstance].deeplinkHandler = ^(NSDictionary * _Nonnull params, NSTimeInterval processTime, NSError * _Nonnull error) {
         NSLog(@"deeplink params is : %@",params);
     };

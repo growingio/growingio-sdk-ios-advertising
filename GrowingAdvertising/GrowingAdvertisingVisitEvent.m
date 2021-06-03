@@ -53,6 +53,7 @@
     dataDictM[@"ui"] = self.idfa;
     dataDictM[@"iv"] = self.idfv;
     dataDictM[@"cs1"] = self.userId;
+    dataDictM[@"v"] = self.urlScheme;
     return dataDictM;
 }
 

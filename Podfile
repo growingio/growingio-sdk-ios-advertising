@@ -12,7 +12,7 @@ workspace 'GrowingAdvertising.xcworkspace'
 target 'Example' do
   project 'Example/Example'
   pod 'GrowingAnalytics/Autotracker', :path => './../growingio-sdk-ios-autotracker'
-  pod 'GrowingAnalytics/Tracker', :path => './../growingio-sdk-ios-autotracker'
+  pod 'GrowingAnalytics/TrackerCore', :path => './../growingio-sdk-ios-autotracker'
   pod 'GrowingAdvertising', :path => './'
 #  pod 'GrowingAnalytics/DISABLE_IDFA', :path => './' #禁用idfa
   pod 'SDCycleScrollView', '~> 1.75'

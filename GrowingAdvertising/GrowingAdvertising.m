@@ -99,7 +99,7 @@ static GrowingAdvertising *advertisingObj = nil;
 
 - (BOOL)isAlreadySendActivate {
     NSNumber *number = [[NSUserDefaults standardUserDefaults] objectForKey:@"GrowingAdvertisingIsAlreadySendActivate"];
-    if (number) {
+    if (number && number.boolValue) {
         return YES;
     }
     return NO;

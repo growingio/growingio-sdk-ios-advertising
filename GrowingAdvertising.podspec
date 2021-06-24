@@ -26,6 +26,7 @@ GrowingAdvertising具备采集广告事件，包括activate,reengage,vst
   s.subspec 'Core' do |core|
       core.source_files = 'GrowingAdvertising/**/*{.h,.m,.c,.cpp,.mm}'
       core.dependency 'GrowingAnalytics/TrackerCore'
+      core.dependency 'GrowingAnalytics/Network'
   end
 
 

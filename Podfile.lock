@@ -15,12 +15,29 @@ PODS:
   - GrowingAdvertising (0.0.1):
     - GrowingAdvertising/Core (= 0.0.1)
   - GrowingAdvertising/Core (0.0.1):
+    - GrowingAnalytics/Network
     - GrowingAnalytics/TrackerCore
-  - GrowingAnalytics/Autotracker (3.2.0-beta):
+  - GrowingAnalytics/Autotracker (3.2.1-beta):
     - GrowingAnalytics/AutotrackerCore
-  - GrowingAnalytics/AutotrackerCore (3.2.0-beta):
+    - GrowingAnalytics/Encryption
+    - GrowingAnalytics/MobileDebugger
+    - GrowingAnalytics/Network
+    - GrowingAnalytics/WebCircle
+  - GrowingAnalytics/AutotrackerCore (3.2.1-beta):
+    - GrowingAnalytics/Hybrid
     - GrowingAnalytics/TrackerCore
-  - GrowingAnalytics/TrackerCore (3.2.0-beta)
+  - GrowingAnalytics/Encryption (3.2.1-beta):
+    - GrowingAnalytics/TrackerCore
+  - GrowingAnalytics/Hybrid (3.2.1-beta):
+    - GrowingAnalytics/TrackerCore
+  - GrowingAnalytics/MobileDebugger (3.2.1-beta):
+    - GrowingAnalytics/TrackerCore
+  - GrowingAnalytics/Network (3.2.1-beta):
+    - GrowingAnalytics/TrackerCore
+  - GrowingAnalytics/TrackerCore (3.2.1-beta)
+  - GrowingAnalytics/WebCircle (3.2.1-beta):
+    - GrowingAnalytics/AutotrackerCore
+    - GrowingAnalytics/Hybrid
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.5.0)
   - SDCycleScrollView (1.82):
@@ -65,8 +82,8 @@ SPEC CHECKSUMS:
   AlicloudUTDID: 7323c443dcdf9a73e2224dc6ce51703671d7a765
   AlicloudUtils: 66e0ba6ece62d7dd05e9dd95674b2c7811624c2f
   EMASRest: 5ccda23f59b05cdd3a6e321c17e37e8125d7eea4
-  GrowingAdvertising: ff27a410c409cddd3354f11c5bd6acf313548e19
-  GrowingAnalytics: dfa8172062acb6fa05e67e68a59f31a95d921ebd
+  GrowingAdvertising: 29f6f06412efe8aedbc22641dfb810a17cba5626
+  GrowingAnalytics: 6620463d81f5f47e13d0200bd774a26dcbbb42dd
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
   SDCycleScrollView: a0d74c3384caa72bdfc81470bdbc8c14b3e1fbcf

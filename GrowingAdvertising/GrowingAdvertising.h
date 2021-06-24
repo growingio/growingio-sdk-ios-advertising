@@ -20,10 +20,10 @@
 
 #import <Foundation/Foundation.h>
 #import "GrowingTrackConfiguration.h"
-
+#import "GrowingModuleProtocol.h"
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GrowingAdvertising : NSObject
+@interface GrowingAdvertising : NSObject <GrowingModuleProtocol>
 
 @property (nonatomic, strong, readonly) GrowingTrackConfiguration *configuration;
 ///如果你想额外处理deeplink的custom_params参数
@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
                      urlScheme:(NSString *)urlScheme;
 
-+ (instancetype)shareInstance;
++ (instancetype)sharedInstance;
 
 /// 打开或关闭数据采集
 /// @param enabled 打开或者关闭

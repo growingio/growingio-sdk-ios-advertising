@@ -48,10 +48,10 @@ static NSString *const kGrowingTemporaryHost = @"https://api.growingio.com";
 }
 
 - (NSURL *)absoluteURL {
-    NSString *baseUrl = [[GrowingAdvertising shareInstance].configuration.dataCollectionServerHost
+    NSString *baseUrl = [[GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost
                             isEqualToString:defaultDataCollectionServerHost]
                             ? kGrowingTemporaryHost
-                            : [GrowingAdvertising shareInstance].configuration.dataCollectionServerHost;
+                            : [GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost;
     ;
     if (!baseUrl.length) {
         return nil;
@@ -61,7 +61,7 @@ static NSString *const kGrowingTemporaryHost = @"https://api.growingio.com";
 }
 
 - (NSString *)path {
-    NSString *accountId = [GrowingAdvertising shareInstance].configuration.projectId ?: @"";
+    NSString *accountId = [GrowingAdvertising sharedInstance].configuration.projectId ?: @"";
     NSString *path = [NSString stringWithFormat:@"v3/%@/ios/pv", accountId];
     return path;
 }

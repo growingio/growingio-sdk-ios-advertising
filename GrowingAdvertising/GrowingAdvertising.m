@@ -27,7 +27,7 @@
 #import "GrowingAdvertisingVisitEvent.h"
 #import "GrowingAdvertisingVstRequest.h"
 #import "GrowingAppLifecycle.h"
-#import "GrowingCocoaLumberjack.h"
+#import "GrowingLogger.h"
 #import "GrowingDeepLinkHandler.h"
 #import "GrowingDeviceInfo.h"
 #import "GrowingEventManager.h"
@@ -39,6 +39,11 @@
 #import "NSURL+GrowingHelper.h"
 #import "GrowingEventChannel.h"
 #import "GrowingDeepLinkHandler.h"
+#import "GrowingEventNetworkService.h"
+#import "GrowingServiceManager.h"
+#import "GrowingAnnotationCore.h"
+
+@GrowingMod(GrowingAdvertising)
 
 @interface GrowingAdvertising () <GrowingDeepLinkHandlerProtocol, GrowingEventInterceptor,GrowingAppLifecycleDelegate>
 
@@ -63,29 +68,33 @@ static GrowingAdvertising *advertisingObj = nil;
 + (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
                      urlScheme:(NSString *)urlScheme
                       callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
+    [GrowingAdvertising sharedInstance].urlScheme = urlScheme;
+    [GrowingAdvertising sharedInstance].deeplinkHandler = handler;
+    [GrowingAdvertising sharedInstance].configuration = configuration;
+}
+
+- (void)growingModInit:(GrowingContext *)context {
+    [[GrowingEventManager sharedInstance] addInterceptor:self];
+    [[GrowingAppLifecycle sharedInstance] addAppLifecycleDelegate:self];
+    [[GrowingDeepLinkHandler sharedInstance] addHandlersObject:self];
+    
+    [self loadClipboardCompletion:^(NSDictionary *dict) {
+        advertisingObj.externParam = dict;
+        [advertisingObj sendActivateEvent];
+    }];
+}
+
++ (BOOL)singleton {
+    return YES;
+}
+
++ (instancetype)sharedInstance {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         if (!advertisingObj) {
             advertisingObj = [[GrowingAdvertising alloc] init];
-            advertisingObj.urlScheme = urlScheme;
-            advertisingObj.deeplinkHandler = handler;
-            [[GrowingEventManager shareInstance] addInterceptor:advertisingObj];
-            [[GrowingAppLifecycle sharedInstance] addAppLifecycleDelegate:advertisingObj];
-            [[GrowingDeepLinkHandler sharedInstance] addHandlersObject:advertisingObj];
         }
     });
-    advertisingObj.configuration = configuration;
-    [advertisingObj loadClipboardCompletion:^(NSDictionary *dict) {
-        advertisingObj.externParam = dict;
-        [advertisingObj sendActivateEvent];
-    }];
-    
-}
-
-+ (instancetype)shareInstance {
-    if (!advertisingObj) {
-        @throw [NSException exceptionWithName:@"GrowingAdvertising未初始化" reason:@"请在applicationDidFinishLaunching中调用startWithConfiguration函数,并且确保在主线程中" userInfo:nil];
-    }
     return advertisingObj;
 }
 
@@ -136,51 +145,58 @@ static GrowingAdvertising *advertisingObj = nil;
             eventRequest.isManual = NO;
             eventRequest.userAgent = userAgent;
             eventRequest.query = [url.query growingHelper_dictionaryObject];
-            [[GrowingNetworkManager shareManager]
-             sendRequest:eventRequest
-             success:^(NSHTTPURLResponse *_Nonnull httpResponse, NSData *_Nonnull data) {
-                NSDictionary *dataDict = [[data growingHelper_dictionaryObject] objectForKey:@"data"];
-                NSMutableDictionary *params = [NSMutableDictionary dictionary];
-                params[@"rngg_mch"] = reengageType;
-                params[@"ua"] = userAgent;
-                params[@"link_id"] = [dataDict objectForKey:@"link_id"];
-                params[@"click_id"] = [dataDict objectForKey:@"click_id"];
-                params[@"tm_click"] = [dataDict objectForKey:@"tm_click"];
-                NSDictionary *dict = [dataDict objectForKey:@"custom_params"];
-                if (dict.count > 0) {
-                    params[@"var"] = dict;
-                }
-                GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(params);
-                [self postEventBuidler:builder];
-                
-                if (handler || self.deeplinkHandler) {
-                    // 处理参数回调
-                    NSMutableDictionary *dictInfo = [NSMutableDictionary dictionaryWithDictionary:dict];
-                    if ([dictInfo objectForKey:@"_gio_var"]) {
-                        [dictInfo removeObjectForKey:@"_gio_var"];
-                    }
-                    if (![dictInfo objectForKey:@"+deeplink_mechanism"]) {
-                        [dictInfo setObject:reengageType forKey:@"+deeplink_mechanism"];
-                    }
-                    
-                    NSError *err = nil;
-                    if (dict.count == 0) {
-                        // 默认错误
-                        err = [NSError errorWithDomain:@"com.growingio.deeplink" code:1 userInfo:@{@"error" : @"no custom_params"}];
-                    }
-                    if (handler) {
-                        NSDate *endDate = [NSDate date];
-                        NSTimeInterval processTime = [endDate timeIntervalSinceDate:startData];
-                        handler(dictInfo, processTime, err);
-                    }else if (self.deeplinkHandler) {
-                        NSDate *endDate = [NSDate date];
-                        NSTimeInterval processTime = [endDate timeIntervalSinceDate:startData];
-                        self.deeplinkHandler(dictInfo, processTime, err);
-                    }
-                }
+            id <GrowingEventNetworkService> service = [[GrowingServiceManager sharedInstance] createService:@protocol(GrowingEventNetworkService)];
+            if (!service) {
+                GIOLogError(@"-growingHandlerUrl:callback: error : no network service support");
+                return;
             }
-             failure:^(NSHTTPURLResponse *_Nonnull httpResponse, NSData *_Nonnull data, NSError *_Nonnull error){
-                
+            [service sendRequest:eventRequest completion:^(NSHTTPURLResponse * _Nonnull httpResponse, NSData * _Nonnull data, NSError * _Nonnull error) {
+                if (error) {
+                    
+                }
+                if (httpResponse.statusCode >= 200 && httpResponse.statusCode < 300) {
+                    NSDictionary *dataDict = [[data growingHelper_dictionaryObject] objectForKey:@"data"];
+                    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+                    params[@"rngg_mch"] = reengageType;
+                    params[@"ua"] = userAgent;
+                    params[@"link_id"] = [dataDict objectForKey:@"link_id"];
+                    params[@"click_id"] = [dataDict objectForKey:@"click_id"];
+                    params[@"tm_click"] = [dataDict objectForKey:@"tm_click"];
+                    NSDictionary *dict = [dataDict objectForKey:@"custom_params"];
+                    if (dict.count > 0) {
+                        params[@"var"] = dict;
+                    }
+                    GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(params);
+                    [self postEventBuidler:builder];
+                    
+                    if (handler || self.deeplinkHandler) {
+                        // 处理参数回调
+                        NSMutableDictionary *dictInfo = [NSMutableDictionary dictionaryWithDictionary:dict];
+                        if ([dictInfo objectForKey:@"_gio_var"]) {
+                            [dictInfo removeObjectForKey:@"_gio_var"];
+                        }
+                        if (![dictInfo objectForKey:@"+deeplink_mechanism"]) {
+                            [dictInfo setObject:reengageType forKey:@"+deeplink_mechanism"];
+                        }
+                        
+                        NSError *err = nil;
+                        if (dict.count == 0) {
+                            // 默认错误
+                            err = [NSError errorWithDomain:@"com.growingio.deeplink" code:1 userInfo:@{@"error" : @"no custom_params"}];
+                        }
+                        if (handler) {
+                            NSDate *endDate = [NSDate date];
+                            NSTimeInterval processTime = [endDate timeIntervalSinceDate:startData];
+                            handler(dictInfo, processTime, err);
+                        }else if (self.deeplinkHandler) {
+                            NSDate *endDate = [NSDate date];
+                            NSTimeInterval processTime = [endDate timeIntervalSinceDate:startData];
+                            self.deeplinkHandler(dictInfo, processTime, err);
+                        }
+                    }
+                } else {
+                    
+                }
             }];
         }];
         return YES;
@@ -361,7 +377,7 @@ static GrowingAdvertising *advertisingObj = nil;
         [self sendActivateEvent];
     }
     
-    [[GrowingEventManager shareInstance] postEventBuidler:builder];
+    [[GrowingEventManager sharedInstance] postEventBuidler:builder];
 }
 /// 由于vst 以及 reenage activate，发送地址和3.0不一致，需要另创建2个channel来发送
 - (void)growingEventManagerChannels:(NSMutableArray<GrowingEventChannel *> *)channels {
@@ -377,7 +393,7 @@ static GrowingAdvertising *advertisingObj = nil;
 - (void)growingEventManagerEventWillBuild:(GrowingBaseBuilder *_Nullable)builder {
     if (builder.eventType == GrowingEventTypeVisit) {
         GrowingAdvertisingVisitEvent *event = [[GrowingAdvertisingVisitEvent alloc] initWithBuilder:builder];
-        [[GrowingEventManager shareInstance] writeToDatabaseWithEvent:event];
+        [[GrowingEventManager sharedInstance] writeToDatabaseWithEvent:event];
     }
 }
 

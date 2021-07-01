@@ -37,7 +37,7 @@ static NSString *const kGrowingTemporaryHost = @"https://t.growingio.com";
 
 - (NSURL *)absoluteURL {
     NSString *baseUrl = [[GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost
-                            isEqualToString:defaultDataCollectionServerHost]
+                            isEqualToString:kGrowingDefaultDataCollectionServerHost]
                             ? kGrowingTemporaryHost
                             : [GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost;
     if (!baseUrl.length) {

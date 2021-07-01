@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'GrowingAdvertising'
-  s.version          = '0.0.1'
+  s.version          = '0.0.2'
   s.summary          = 'iOS SDK of GrowingIO.'
   s.description      = <<-DESC
 GrowingAdvertising具备采集广告事件，包括activate,reengage,vst
@@ -25,8 +25,8 @@ GrowingAdvertising具备采集广告事件，包括activate,reengage,vst
   
   s.subspec 'Core' do |core|
       core.source_files = 'GrowingAdvertising/**/*{.h,.m,.c,.cpp,.mm}'
-      core.dependency 'GrowingAnalytics/TrackerCore'
-      core.dependency 'GrowingAnalytics/Network'
+      core.dependency 'GrowingAnalytics/TrackerCore','>= 3.2.1-beta'
+      core.dependency 'GrowingAnalytics/Network','>= 3.2.1-beta'
   end
 
 

@@ -22,9 +22,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class GrowingAdvertisingVisitBuilder;
+
 @interface GrowingAdvertisingVisitEvent : GrowingVisitEvent
+
++ (GrowingAdvertisingVisitBuilder *_Nonnull)builder;
 
 @end
 
-// 由于广告sdk的vst事件基于SAAS 3.0的visit事件，这里不再独立配置有builder
+@interface GrowingAdvertisingVisitBuilder : GrowingVisitBuidler
+
+@end
+
 NS_ASSUME_NONNULL_END

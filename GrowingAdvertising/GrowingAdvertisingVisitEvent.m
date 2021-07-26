@@ -22,9 +22,11 @@
 #import "GrowingRealTracker.h"
 @implementation GrowingAdvertisingVisitEvent
 
-- (NSString *)eventType {
-    return @"vst";
++ (GrowingAdvertisingVisitBuilder *_Nonnull)builder {
+    return [[GrowingAdvertisingVisitBuilder alloc] init];
 }
+
+#pragma mark GrowingEventTransformable
 
 - (NSDictionary *)toDictionary {
     NSMutableDictionary *dataDictM = [NSMutableDictionary dictionary];
@@ -55,6 +57,18 @@
     dataDictM[@"cs1"] = self.userId;
     dataDictM[@"v"] = self.urlScheme;
     return dataDictM;
+}
+
+@end
+
+@implementation GrowingAdvertisingVisitBuilder
+
+- (GrowingBaseEvent *)build {
+    return [[GrowingAdvertisingVisitEvent alloc] initWithBuilder:self];
+}
+
+- (NSString *)eventType {
+    return @"vst";
 }
 
 @end

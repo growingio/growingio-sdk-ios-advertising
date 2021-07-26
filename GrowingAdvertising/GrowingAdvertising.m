@@ -45,7 +45,7 @@
 
 @GrowingMod(GrowingAdvertising)
 
-@interface GrowingAdvertising () <GrowingDeepLinkHandlerProtocol, GrowingEventInterceptor,GrowingAppLifecycleDelegate>
+@interface GrowingAdvertising () <GrowingDeepLinkHandlerProtocol, GrowingEventInterceptor, GrowingAppLifecycleDelegate>
 
 @property (nonatomic, strong) WKWebView *wkWebView;
 @property (nonatomic, strong, readwrite) GrowingTrackConfiguration *configuration;
@@ -114,7 +114,7 @@ static GrowingAdvertising *advertisingObj = nil;
     return NO;
 }
 
-- (void)doDeeplinkByUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler{
+- (void)doDeeplinkByUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
     [self growingHandlerUrl:url callback:handler];
 }
 
@@ -122,7 +122,7 @@ static GrowingAdvertising *advertisingObj = nil;
     return [self growingHandlerUrl:url callback:nil];
 }
 
-- (BOOL)growingHandlerUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler{
+- (BOOL)growingHandlerUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
     if (!url || !self.configuration.projectId) {
         return NO;
     }
@@ -213,7 +213,7 @@ static GrowingAdvertising *advertisingObj = nil;
             dictM[@"ua"] = userAgent;
             GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(dictM);
             [self postEventBuidler:builder];
-            
+
             if (self.deeplinkHandler || handler) {
                 NSString *custom_params_str = params[@"custom_params"];
                 NSArray *pair = [custom_params_str componentsSeparatedByString:@"="];
@@ -224,7 +224,7 @@ static GrowingAdvertising *advertisingObj = nil;
                         NSString *jsonStr = [self URLDecodedString:encodeJsonStr];
                         NSData *data = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];
                         NSDictionary *info = [NSJSONSerialization JSONObjectWithData:data options:0 error:&err];
-                        NSMutableDictionary *dicInfo  = [NSMutableDictionary dictionaryWithDictionary:info] ;
+                        NSMutableDictionary *dicInfo = [NSMutableDictionary dictionaryWithDictionary:info];
                         if ([dicInfo objectForKey:@"_gio_var"]) {
                             [dicInfo removeObjectForKey:@"_gio_var"];
                         }
@@ -233,7 +233,7 @@ static GrowingAdvertising *advertisingObj = nil;
                         }
                         info = dicInfo;
                         if (!info) {
-                            GIOLogDebug(@"%s error : %@", __FUNCTION__,err);
+                            GIOLogDebug(@"%s error : %@", __FUNCTION__, err);
                         }
                         if (!info && !err) {
                             // 默认错误
@@ -244,7 +244,6 @@ static GrowingAdvertising *advertisingObj = nil;
                         } else if (self.deeplinkHandler) {
                             self.deeplinkHandler(info, 0.0, err);
                         }
-                        
                     }
                 }
             }
@@ -254,14 +253,12 @@ static GrowingAdvertising *advertisingObj = nil;
     return NO;
 }
 
-
 - (NSString *)URLDecodedString:(NSString *)urlString {
-    urlString = [urlString
-    stringByReplacingOccurrencesOfString:@"+" withString:@" "];
-    NSString *decodedString = (__bridge_transfer NSString *)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL,
-                                                                                                                    (__bridge CFStringRef)urlString,
-                                                                                                                    CFSTR(""),
-                                                                                                                    CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+    urlString = [urlString stringByReplacingOccurrencesOfString:@"+" withString:@" "];
+    NSString *decodedString = (__bridge_transfer NSString *) CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL,
+                                                                                                                     (__bridge CFStringRef) urlString,
+                                                                                                                     CFSTR(""),
+                                                                                                                     CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
     return decodedString;
 }
 
@@ -297,8 +294,7 @@ static GrowingAdvertising *advertisingObj = nil;
 
 #pragma mark - Event handler
 
-- (void)loadClipboardCompletion:(void(^)(NSDictionary *dict))block {
-    
+- (void)loadClipboardCompletion:(void (^)(NSDictionary *dict))block {
     if (self.isAlreadySendActivate) {
         return;
     }
@@ -320,11 +316,11 @@ static GrowingAdvertising *advertisingObj = nil;
         dictM[@"click_id"] = clipboardDict[@"click_id"];
         dictM[@"tm_click"] = clipboardDict[@"tm_click"];
         dictM[@"cl"] = clipboardDict[@"defer"];
-        
-        
-        NSString *customStr = clipboardDict[@"v1"][@"custom_params"]?:@"";
+
+
+        NSString *customStr = clipboardDict[@"v1"][@"custom_params"] ?: @"";
         NSDictionary *customParams = customStr.growingHelper_dictionaryObject;
-        
+
         dispatch_async(dispatch_get_main_queue(), ^{
             /// send reenagate
             NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -336,7 +332,7 @@ static GrowingAdvertising *advertisingObj = nil;
                 GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(params);
                 [self postEventBuidler:builder];
             }];
-            
+
             if ([[UIPasteboard generalPasteboard].string isEqualToString:clipboardContent]) {
                 [UIPasteboard generalPasteboard].string = @"";
             }
@@ -345,18 +341,17 @@ static GrowingAdvertising *advertisingObj = nil;
             }
         });
     });
-    
 }
 
 - (void)sendActivateEvent {
     if (self.isAlreadySendActivate) {
         return;
     }
-    
+
     if (!self.configuration.dataCollectionEnabled) {
         return;
     }
-    
+
     [self accessUserAgent:^(NSString *userAgent) {
         NSMutableDictionary *dictM = [NSMutableDictionary dictionary];
         dictM[@"ua"] = userAgent;
@@ -365,35 +360,35 @@ static GrowingAdvertising *advertisingObj = nil;
         self.isAlreadySendActivate = YES;
         [self postEventBuidler:builder];
     }];
-    
 }
 
 - (void)postEventBuidler:(GrowingBaseBuilder *)builder {
     if (!self.configuration.dataCollectionEnabled) {
         return;
     }
-    
+
     if (!self.isAlreadySendActivate) {
         [self sendActivateEvent];
     }
-    
+
     [[GrowingEventManager sharedInstance] postEventBuidler:builder];
 }
+
 /// 由于vst 以及 reenage activate，发送地址和3.0不一致，需要另创建2个channel来发送
 - (void)growingEventManagerChannels:(NSMutableArray<GrowingEventChannel *> *)channels {
     [channels addObject:[GrowingEventChannel eventChannelWithEventTypes:@[@"vst"]
                                                             urlTemplate:@"v3/%@/ios/pv?stm=%llu"
                                                           isCustomEvent:NO]];
     [channels addObject:[GrowingEventChannel eventChannelWithEventTypes:@[@"reengage",@"activate"]
-                                                             urlTemplate:@"app/%@/ios/ctvt"
-                                                           isCustomEvent:NO]];
+                                                            urlTemplate:@"app/%@/ios/ctvt"
+                                                          isCustomEvent:NO]];
 }
 
 /// 拦截visit事件，并发出广告sdk的vst
 - (void)growingEventManagerEventWillBuild:(GrowingBaseBuilder *_Nullable)builder {
     if (builder.eventType == GrowingEventTypeVisit) {
-        GrowingAdvertisingVisitEvent *event = [[GrowingAdvertisingVisitEvent alloc] initWithBuilder:builder];
-        [[GrowingEventManager sharedInstance] writeToDatabaseWithEvent:event];
+        GrowingAdvertisingVisitBuilder *b = (GrowingAdvertisingVisitBuilder *)GrowingAdvertisingVisitEvent.builder.setTimestamp(builder.timestamp);
+        [self postEventBuidler:b];
     }
 }
 
@@ -423,6 +418,7 @@ static GrowingAdvertising *advertisingObj = nil;
 - (BOOL)isV1Url:(NSURL *)url {
     return ([url.host isEqualToString:@"datayi.cn"] || [url.host hasSuffix:@".datayi.cn"]);
 }
+
 #pragma mark - extern
 
 - (NSDictionary *)dictFromPastboard:(NSString *)clipboardString {

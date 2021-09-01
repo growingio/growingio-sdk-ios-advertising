@@ -60,8 +60,8 @@
 
 @implementation GrowingReengageBuilder
 
-- (void)readPropertyInMainThread {
-    [super readPropertyInMainThread];
+- (void)readPropertyInTrackThread {
+    [super readPropertyInTrackThread];
     GrowingDeviceInfo *deviceInfo = [GrowingDeviceInfo currentDeviceInfo];
     _idfa = deviceInfo.idfa;
     _idfv = deviceInfo.idfv;

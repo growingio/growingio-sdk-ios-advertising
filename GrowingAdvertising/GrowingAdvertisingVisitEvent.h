@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface GrowingAdvertisingVisitBuilder : GrowingVisitBuidler
+@interface GrowingAdvertisingVisitBuilder : GrowingVisitBuilder
 
 @end
 

@@ -57,6 +57,8 @@
 
 @end
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
 @implementation GrowingReengageBuilder
 
 - (void)readPropertyInTrackThread {
@@ -88,3 +90,4 @@
 }
 
 @end
+#pragma clang diagnostic pop

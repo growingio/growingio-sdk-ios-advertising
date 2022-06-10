@@ -169,7 +169,7 @@ GrowingMod(GrowingAdvertising)
                         params[@"var"] = dict;
                     }
                     GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(params);
-                    [self postEventBuidler:builder];
+                    [self postEventBuilder:builder];
                     
                     if (handler || self.deeplinkHandler) {
                         // 处理参数回调
@@ -214,7 +214,7 @@ GrowingMod(GrowingAdvertising)
             dictM[@"rngg_mch"] = reengageType;
             dictM[@"ua"] = userAgent;
             GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(dictM);
-            [self postEventBuidler:builder];
+            [self postEventBuilder:builder];
 
             if (self.deeplinkHandler || handler) {
                 NSString *custom_params_str = params[@"custom_params"];
@@ -321,7 +321,7 @@ GrowingMod(GrowingAdvertising)
                 params[@"rngg_mch"] = @"universal_link";
                 params[@"ua"] = userAgent;
                 GrowingReengageBuilder *builder = GrowingReengageEvent.builder.setExtraParams(params);
-                [self postEventBuidler:builder];
+                [self postEventBuilder:builder];
             }];
 
             if ([[UIPasteboard generalPasteboard].string isEqualToString:clipboardContent]) {
@@ -351,11 +351,11 @@ GrowingMod(GrowingAdvertising)
         [dictM addEntriesFromDictionary:self.externParam];
         GrowingActivateBuilder *builder = GrowingActivateEvent.builder.setExtraParams(dictM);
         self.alreadySendActivate = YES;
-        [self postEventBuidler:builder];
+        [self postEventBuilder:builder];
     }];
 }
 
-- (void)postEventBuidler:(GrowingBaseBuilder *)builder {
+- (void)postEventBuilder:(GrowingBaseBuilder *)builder {
     if (!self.configuration.dataCollectionEnabled) {
         return;
     }
@@ -364,7 +364,7 @@ GrowingMod(GrowingAdvertising)
         [self sendActivateEvent];
     }
 
-    [[GrowingEventManager sharedInstance] postEventBuidler:builder];
+    [[GrowingEventManager sharedInstance] postEventBuilder:builder];
 }
 
 #pragma mark - GrowingDeepLinkHandlerProtocol
@@ -389,7 +389,7 @@ GrowingMod(GrowingAdvertising)
 - (void)growingEventManagerEventWillBuild:(GrowingBaseBuilder *_Nullable)builder {
     if (builder.eventType == GrowingEventTypeVisit) {
         GrowingAdvertisingVisitBuilder *b = (GrowingAdvertisingVisitBuilder *)GrowingAdvertisingVisitEvent.builder.setTimestamp(builder.timestamp);
-        [self postEventBuidler:b];
+        [self postEventBuilder:b];
     }
 }
 

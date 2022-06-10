@@ -1,6 +1,6 @@
 //
-// GrowingAdvertisingParser.m
-// GrowingAnalytics
+// GrowingAdvertising.m
+// GrowingAdvertising
 //
 //  Created by sheng on 2021/5/11.
 //  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
@@ -17,60 +17,52 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingAdvertising.h"
+#import "GrowingAdvertising/Public/GrowingAdvertising.h"
 
 #import <WebKit/WebKit.h>
 
-#import "GrowingActivateEvent.h"
-#import "GrowingAdvertisingPreRequest.h"
-#import "GrowingAdvertisingRequest.h"
-#import "GrowingAdvertisingVisitEvent.h"
-#import "GrowingAdvertisingVstRequest.h"
-#import "GrowingAppLifecycle.h"
-#import "GrowingLogger.h"
-#import "GrowingDeepLinkHandler.h"
-#import "GrowingDeviceInfo.h"
-#import "GrowingEventManager.h"
-#import "GrowingNetworkManager.h"
-#import "GrowingReengageEvent.h"
-#import "NSData+GrowingHelper.h"
-#import "NSDictionary+GrowingHelper.h"
-#import "NSString+GrowingHelper.h"
-#import "NSURL+GrowingHelper.h"
-#import "GrowingEventChannel.h"
-#import "GrowingDeepLinkHandler.h"
-#import "GrowingEventNetworkService.h"
-#import "GrowingServiceManager.h"
-#import "GrowingAnnotationCore.h"
+#import "GrowingAdvertising/Event/GrowingActivateEvent.h"
+#import "GrowingAdvertising/Event/GrowingReengageEvent.h"
+#import "GrowingAdvertising/Event/GrowingAdvertisingVisitEvent.h"
+#import "GrowingAdvertising/Request/GrowingAdvertisingPreRequest.h"
+#import "GrowingAdvertising/Request/GrowingAdvertisingRequest.h"
+#import "GrowingAdvertising/Request/GrowingAdvertisingVstRequest.h"
 
-@GrowingMod(GrowingAdvertising)
+#import "GrowingTrackerCore/Public/GrowingEventNetworkService.h"
+#import "GrowingTrackerCore/Public/GrowingServiceManager.h"
+#import "GrowingTrackerCore/Public/GrowingAnnotationCore.h"
+#import "GrowingTrackerCore/Event/GrowingEventManager.h"
+#import "GrowingTrackerCore/Event/GrowingEventChannel.h"
+#import "GrowingTrackerCore/Event/GrowingTrackEventType.h"
+#import "GrowingTrackerCore/Helpers/NSData+GrowingHelper.h"
+#import "GrowingTrackerCore/Helpers/NSDictionary+GrowingHelper.h"
+#import "GrowingTrackerCore/Helpers/NSString+GrowingHelper.h"
+#import "GrowingTrackerCore/Helpers/NSURL+GrowingHelper.h"
+#import "GrowingTrackerCore/Hook/GrowingAppLifecycle.h"
+#import "GrowingTrackerCore/Utils/GrowingDeviceInfo.h"
+#import "GrowingTrackerCore/DeepLink/GrowingDeepLinkHandler.h"
+#import "GrowingTrackerCore/Thirdparty/Logger/GrowingLogger.h"
+
+GrowingMod(GrowingAdvertising)
 
 @interface GrowingAdvertising () <GrowingDeepLinkHandlerProtocol, GrowingEventInterceptor, GrowingAppLifecycleDelegate>
 
 @property (nonatomic, strong) WKWebView *wkWebView;
 @property (nonatomic, strong, readwrite) GrowingTrackConfiguration *configuration;
 /// 是否已经发了activate，也表示是否第一次启动
-@property (nonatomic, assign) BOOL isAlreadySendActivate;
+@property (nonatomic, assign, getter=isAlreadySendActivate) BOOL alreadySendActivate;
 @property (nonatomic, copy) NSString *userAgent;
 @property (nonatomic, strong) NSDictionary *externParam;
 @property (nonatomic, copy) NSString *urlScheme;
+
 @end
 
 @implementation GrowingAdvertising
 
-static GrowingAdvertising *advertisingObj = nil;
+#pragma mark - GrowingModuleProtocol
 
-+ (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
-                     urlScheme:(NSString *)urlScheme {
-    [self startWithConfiguration:configuration urlScheme:urlScheme callback:nil];
-}
-
-+ (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
-                     urlScheme:(NSString *)urlScheme
-                      callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
-    [GrowingAdvertising sharedInstance].urlScheme = urlScheme;
-    [GrowingAdvertising sharedInstance].deeplinkHandler = handler;
-    [GrowingAdvertising sharedInstance].configuration = configuration;
++ (BOOL)singleton {
+    return YES;
 }
 
 - (void)growingModInit:(GrowingContext *)context {
@@ -79,31 +71,49 @@ static GrowingAdvertising *advertisingObj = nil;
     [[GrowingDeepLinkHandler sharedInstance] addHandlersObject:self];
     
     [self loadClipboardCompletion:^(NSDictionary *dict) {
-        advertisingObj.externParam = dict;
-        [advertisingObj sendActivateEvent];
+        self.externParam = dict;
+        [self sendActivateEvent];
     }];
 }
 
-+ (BOOL)singleton {
-    return YES;
-}
+#pragma mark - Public Method
 
 + (instancetype)sharedInstance {
+    static GrowingAdvertising *_sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        if (!advertisingObj) {
-            advertisingObj = [[GrowingAdvertising alloc] init];
+        if (!_sharedInstance) {
+            _sharedInstance = [[GrowingAdvertising alloc] init];
         }
     });
-    return advertisingObj;
+    return _sharedInstance;
+}
+
++ (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
+                     urlScheme:(NSString *)urlScheme {
+    [self startWithConfiguration:configuration urlScheme:urlScheme callback:nil];
+}
+
++ (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
+                     urlScheme:(NSString *)urlScheme
+                      callback:(void (^_Nullable)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
+    [GrowingAdvertising sharedInstance].urlScheme = urlScheme;
+    [GrowingAdvertising sharedInstance].deeplinkHandler = handler;
+    [GrowingAdvertising sharedInstance].configuration = configuration;
 }
 
 - (void)setDataCollectionEnabled:(BOOL)enabled {
     self.configuration.dataCollectionEnabled = enabled;
 }
 
-- (void)setIsAlreadySendActivate:(BOOL)isAlreadySendActivate {
-    [[NSUserDefaults standardUserDefaults] setObject:@(isAlreadySendActivate) forKey:@"GrowingAdvertisingIsAlreadySendActivate"];
+- (void)doDeeplinkByUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
+    [self growingHandlerUrl:url callback:handler];
+}
+
+#pragma mark - Private Method
+
+- (void)setAlreadySendActivate:(BOOL)alreadySendActivate {
+    [[NSUserDefaults standardUserDefaults] setObject:@(alreadySendActivate) forKey:@"GrowingAdvertisingIsAlreadySendActivate"];
 }
 
 - (BOOL)isAlreadySendActivate {
@@ -112,14 +122,6 @@ static GrowingAdvertising *advertisingObj = nil;
         return YES;
     }
     return NO;
-}
-
-- (void)doDeeplinkByUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
-    [self growingHandlerUrl:url callback:handler];
-}
-
-- (BOOL)growingHandlerUrl:(NSURL *)url {
-    return [self growingHandlerUrl:url callback:nil];
 }
 
 - (BOOL)growingHandlerUrl:(NSURL *)url callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler {
@@ -135,7 +137,7 @@ static GrowingAdvertising *advertisingObj = nil;
         reengageType = @"universal_link";
     }
     // short chain
-    if ([self isUrlShortChain:url]) {
+    if ([self isShortChainUlink:url]) {
         NSDate *startData = [NSDate date];
         NSString *hashId = [url.path componentsSeparatedByString:@"/"].lastObject;
         [self accessUserAgent:^(NSString *userAgent) {
@@ -253,15 +255,6 @@ static GrowingAdvertising *advertisingObj = nil;
     return NO;
 }
 
-- (NSString *)URLDecodedString:(NSString *)urlString {
-    urlString = [urlString stringByReplacingOccurrencesOfString:@"+" withString:@" "];
-    NSString *decodedString = (__bridge_transfer NSString *) CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL,
-                                                                                                                     (__bridge CFStringRef) urlString,
-                                                                                                                     CFSTR(""),
-                                                                                                                     CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-    return decodedString;
-}
-
 /// WKWebview 获取 User Agent
 /// @param block 获取后的回调函数
 - (void)accessUserAgent:(void (^)(NSString *userAgent))block {
@@ -271,7 +264,7 @@ static GrowingAdvertising *advertisingObj = nil;
     }
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        // WKWebView的initWithFrame方法偶发崩溃，这里@try@catch保护
+        // WKWebView的initWithFrame方法偶发崩溃，这里 @try @catch保护
         @try {
             weakSelf.wkWebView = [[WKWebView alloc] initWithFrame:CGRectZero];
             [weakSelf.wkWebView evaluateJavaScript:@"navigator.userAgent"
@@ -291,8 +284,6 @@ static GrowingAdvertising *advertisingObj = nil;
         }
     });
 }
-
-#pragma mark - Event handler
 
 - (void)loadClipboardCompletion:(void (^)(NSDictionary *dict))block {
     if (self.isAlreadySendActivate) {
@@ -343,21 +334,23 @@ static GrowingAdvertising *advertisingObj = nil;
     });
 }
 
-- (void)sendActivateEvent {
-    if (self.isAlreadySendActivate) {
-        return;
-    }
+#pragma mark - Event handler
 
+- (void)sendActivateEvent {
     if (!self.configuration.dataCollectionEnabled) {
         return;
     }
 
     [self accessUserAgent:^(NSString *userAgent) {
+        if (self.isAlreadySendActivate) {
+            return;
+        }
+        
         NSMutableDictionary *dictM = [NSMutableDictionary dictionary];
         dictM[@"ua"] = userAgent;
         [dictM addEntriesFromDictionary:self.externParam];
         GrowingActivateBuilder *builder = GrowingActivateEvent.builder.setExtraParams(dictM);
-        self.isAlreadySendActivate = YES;
+        self.alreadySendActivate = YES;
         [self postEventBuidler:builder];
     }];
 }
@@ -374,12 +367,20 @@ static GrowingAdvertising *advertisingObj = nil;
     [[GrowingEventManager sharedInstance] postEventBuidler:builder];
 }
 
+#pragma mark - GrowingDeepLinkHandlerProtocol
+
+- (BOOL)growingHandlerUrl:(NSURL *)url {
+    return [self growingHandlerUrl:url callback:nil];
+}
+
+#pragma mark - GrowingEventInterceptor
+
 /// 由于vst 以及 reenage activate，发送地址和3.0不一致，需要另创建2个channel来发送
 - (void)growingEventManagerChannels:(NSMutableArray<GrowingEventChannel *> *)channels {
     [channels addObject:[GrowingEventChannel eventChannelWithEventTypes:@[@"vst"]
                                                             urlTemplate:@"v3/%@/ios/pv?stm=%llu"
                                                           isCustomEvent:NO]];
-    [channels addObject:[GrowingEventChannel eventChannelWithEventTypes:@[@"reengage",@"activate"]
+    [channels addObject:[GrowingEventChannel eventChannelWithEventTypes:@[@"reengage", @"activate"]
                                                             urlTemplate:@"app/%@/ios/ctvt"
                                                           isCustomEvent:NO]];
 }
@@ -403,15 +404,15 @@ static GrowingAdvertising *advertisingObj = nil;
     return nil;
 }
 
-#pragma mark - url extern
+#pragma mark - URL Extern
 
-- (BOOL)isUrlShortChain:(NSURL *)url {
+- (BOOL)isShortChainUlink:(NSURL *)url {
     if (!url) {
         return NO;
     }
 
-    BOOL isShortChainUlink = ([url.host isEqualToString:@"gio.ren"] || [self isV1Url:url]) &&
-                             [url.path componentsSeparatedByString:@"/"].count == 2;
+    BOOL isShortChainUlink = ([url.host isEqualToString:@"gio.ren"] || [self isV1Url:url])
+                             && [url.path componentsSeparatedByString:@"/"].count == 2;
     return isShortChainUlink;
 }
 
@@ -419,7 +420,16 @@ static GrowingAdvertising *advertisingObj = nil;
     return ([url.host isEqualToString:@"datayi.cn"] || [url.host hasSuffix:@".datayi.cn"]);
 }
 
-#pragma mark - extern
+#pragma mark - Extern
+
+- (NSString *)URLDecodedString:(NSString *)urlString {
+    urlString = [urlString stringByReplacingOccurrencesOfString:@"+" withString:@" "];
+    NSString *decodedString = (__bridge_transfer NSString *) CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL,
+                                                                                                                     (__bridge CFStringRef) urlString,
+                                                                                                                     CFSTR(""),
+                                                                                                                     CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+    return decodedString;
+}
 
 - (NSDictionary *)dictFromPastboard:(NSString *)clipboardString {
     if (clipboardString.length > 2000 * 16) {

@@ -1,6 +1,6 @@
 //
 // GrowingActivateEvent.m
-// GrowingAnalytics-0cad4c59
+// GrowingAdvertising
 //
 //  Created by sheng on 2021/5/21.
 //  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
@@ -17,26 +17,36 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingActivateEvent.h"
+#import "GrowingAdvertising/Event/GrowingActivateEvent.h"
+#import "GrowingTrackerCore/Utils/GrowingDeviceInfo.h"
 
 @implementation GrowingActivateEvent
 
-+ (GrowingActivateBuilder *_Nonnull)builder {
+- (instancetype)initWithBuilder:(GrowingBaseBuilder *)builder {
+    if (self = [super initWithBuilder:builder]) {
+        GrowingActivateBuilder *subBuilder = (GrowingActivateBuilder *)builder;
+        _idfa = subBuilder.idfa;
+        _idfv = subBuilder.idfv;
+    }
+    return self;
+}
+
++ (GrowingActivateBuilder *)builder {
     return [[GrowingActivateBuilder alloc] init];
 }
 
-- (NSString *)eventType {
-    return @"activate";
+- (GrowingEventSendPolicy)sendPolicy {
+    return GrowingEventSendPolicyInstant;
 }
 
 - (NSDictionary *)toDictionary {
     NSMutableDictionary *dataDictM = [NSMutableDictionary dictionary];
     dataDictM[@"u"] = self.deviceId;
     dataDictM[@"t"] = self.eventType;
+    dataDictM[@"tm"] = @(self.timestamp);
     dataDictM[@"d"] = self.domain;
     dataDictM[@"dm"] = self.deviceModel;
     dataDictM[@"osv"] = self.platformVersion;
-    dataDictM[@"tm"] = @(self.timestamp);
     dataDictM[@"iv"] = self.idfv;
     dataDictM[@"ui"] = self.idfa;
     dataDictM[@"gesid"] = @(self.globalSequenceId);
@@ -49,12 +59,32 @@
 
 @implementation GrowingActivateBuilder
 
-- (NSString *)eventType {
-    return @"activate";
+- (void)readPropertyInTrackThread {
+    [super readPropertyInTrackThread];
+    GrowingDeviceInfo *deviceInfo = [GrowingDeviceInfo currentDeviceInfo];
+    _idfa = deviceInfo.idfa;
+    _idfv = deviceInfo.idfv;
 }
 
 - (GrowingBaseEvent *)build {
     return [[GrowingActivateEvent alloc] initWithBuilder:self];
+}
+
+- (NSString *)eventType {
+    return @"activate";
+}
+
+- (GrowingActivateBuilder *(^)(NSString *value))setIdfa {
+    return ^(NSString *value) {
+        self->_idfa = value;
+        return self;
+    };
+}
+- (GrowingActivateBuilder *(^)(NSString *value))setIdfv {
+    return ^(NSString *value) {
+        self->_idfv = value;
+        return self;
+    };
 }
 
 @end

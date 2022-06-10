@@ -1,9 +1,9 @@
 //
-// GrowingDeepLinkRequest.h
-// GrowingAnalytics
+//  GrowingAdvertisingRequestAdapter.h
+//  GrowingAdvertising
 //
-//  Created by sheng on 2021/5/12.
-//  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
+//  Created by YoloMao on 2022/6/9.
+//  Copyright (C) 2022 Beijing Yishu Technology Co., Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,19 +17,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-
 #import <Foundation/Foundation.h>
 #import "GrowingRequestProtocol.h"
-#import "GrowingEventRequestAdapter.h"
 
 NS_ASSUME_NONNULL_BEGIN
-/// 发送reengage之前需要发送一个前置请求请求数据
-@interface GrowingAdvertisingPreRequest : NSObject <GrowingRequestProtocol>
 
-@property (nonatomic, assign) BOOL isManual;
-@property (nonatomic, copy) NSString *hashId;
-@property (nonatomic, copy) NSString *userAgent;
-@property (nonatomic, strong) NSDictionary *query;
+@interface GrowingAdvertisingRequestAdapter : NSObject <GrowingRequestAdapter>
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -1,6 +1,6 @@
 //
-// GrowingAdvertisingParser.h
-// GrowingAnalytics
+// GrowingAdvertising.h
+// GrowingAdvertising
 //
 //  Created by sheng on 2021/5/11.
 //  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
@@ -17,10 +17,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-
 #import <Foundation/Foundation.h>
 #import "GrowingTrackConfiguration.h"
 #import "GrowingModuleProtocol.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface GrowingAdvertising : NSObject <GrowingModuleProtocol>
@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
                      urlScheme:(NSString *)urlScheme
-                      callback:(void (^)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler;
+                      callback:(void (^_Nullable)(NSDictionary *params, NSTimeInterval processTime, NSError *error))handler;
 
 + (void)startWithConfiguration:(GrowingTrackConfiguration *)configuration
                      urlScheme:(NSString *)urlScheme;

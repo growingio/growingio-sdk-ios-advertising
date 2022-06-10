@@ -1,9 +1,7 @@
 #!/bin/bash
 set -x
 
-pod repo update
-
-POD_BETA_VERSOIN=`cat GrowingAnalytics.podspec | grep 's.version\s*=' | grep -Eo '[0-9]+.[0-9]+.[0-9]+'-beta`
+POD_BETA_VERSOIN=`cat GrowingAdvertising.podspec | grep 's.version\s*=' | grep -Eo '[0-9]+.[0-9]+.[0-9]+'-beta`
 BETA='beta'
 
 if [[ $POD_BETA_VERSOIN == *$BETA* ]]
@@ -12,13 +10,6 @@ then
 else
     echo "spec文件中，版本号不包含beta,无法进行beta版本发布"
     exit 0;
-fi
-
-if  [ ! -n "$POD_BETA_VERSOIN" ] ;then
-    echo "you have not input a word!"
-    exit 1;
-else
-    echo "the word you input is $POD_BETA_VERSOIN"
 fi
 
 TAG_VERSION=$(git tag | grep $POD_BETA_VERSOIN)
@@ -33,7 +24,7 @@ else
 fi
 
 echo "删除trunk上的cocoapods库"
-echo y | pod trunk delete GrowingAnalytics $POD_BETA_VERSOIN 
+echo y | pod trunk delete GrowingAdvertising $POD_BETA_VERSOIN 
 
 git tag $POD_BETA_VERSOIN
 git push --tags

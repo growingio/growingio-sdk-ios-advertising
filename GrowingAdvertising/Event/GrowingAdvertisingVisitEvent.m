@@ -1,6 +1,6 @@
 //
-// GrowingReengageEvent.m
-// GrowingAnalytics-0cad4c59
+// GrowingAdvertisingVisitEvent.m
+// GrowingAdvertising
 //
 //  Created by sheng on 2021/5/21.
 //  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
@@ -17,48 +17,65 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingReengageEvent.h"
+#import "GrowingAdvertising/Event/GrowingAdvertisingVisitEvent.h"
+#import "GrowingTrackerCore/Utils/GrowingDeviceInfo.h"
+#import "GrowingTrackerCore/GrowingRealTracker.h"
 
-#import "GrowingDeviceInfo.h"
-
-@implementation GrowingReengageEvent
+@implementation GrowingAdvertisingVisitEvent
 
 - (instancetype)initWithBuilder:(GrowingBaseBuilder *)builder {
     if (self = [super initWithBuilder:builder]) {
-        GrowingReengageBuilder *subBuilder = (GrowingReengageBuilder*)builder;
+        GrowingAdvertisingVisitBuilder *subBuilder = (GrowingAdvertisingVisitBuilder *)builder;
         _idfa = subBuilder.idfa;
         _idfv = subBuilder.idfv;
     }
     return self;
 }
 
-+ (GrowingReengageBuilder *_Nonnull)builder {
-    return [[GrowingReengageBuilder alloc] init];
++ (GrowingAdvertisingVisitBuilder *_Nonnull)builder {
+    return [[GrowingAdvertisingVisitBuilder alloc] init];
 }
 
-- (NSString *)eventType {
-    return @"reengage";
+- (GrowingEventSendPolicy)sendPolicy {
+    return GrowingEventSendPolicyInstant;
 }
+
+#pragma mark GrowingEventTransformable
 
 - (NSDictionary *)toDictionary {
     NSMutableDictionary *dataDictM = [NSMutableDictionary dictionary];
+    if (self.extraParams.count > 0) {
+        [dataDictM addEntriesFromDictionary:self.extraParams];
+    }
     dataDictM[@"u"] = self.deviceId;
+    dataDictM[@"s"] = self.sessionId;
     dataDictM[@"t"] = self.eventType;
     dataDictM[@"tm"] = @(self.timestamp);
+    dataDictM[@"av"] = GrowingTrackerVersionName;
     dataDictM[@"d"] = self.domain;
+    dataDictM[@"sh"] = @(self.screenHeight);
+    dataDictM[@"sw"] = @(self.screenWidth);
+    dataDictM[@"db"] = self.deviceBrand;
     dataDictM[@"dm"] = self.deviceModel;
+    dataDictM[@"ph"] = self.deviceType;
+    dataDictM[@"os"] = self.platform;
     dataDictM[@"osv"] = self.platformVersion;
-    dataDictM[@"ui"] = self.idfa;
-    dataDictM[@"iv"] = self.idfv;
+    dataDictM[@"cv"] = self.appVersion;
+    dataDictM[@"l"] = self.language;
+    dataDictM[@"lat"] = ABS(self.latitude) > 0 ? @(self.latitude) : nil;
+    dataDictM[@"lng"] = ABS(self.longitude) > 0 ? @(self.longitude) : nil;
     dataDictM[@"gesid"] = @(self.globalSequenceId);
     dataDictM[@"esid"] = @(self.eventSequenceId);
-    [dataDictM addEntriesFromDictionary:self.extraParams];
+    dataDictM[@"ui"] = self.idfa;
+    dataDictM[@"iv"] = self.idfv;
+    dataDictM[@"cs1"] = self.userId;
+    dataDictM[@"v"] = self.urlScheme;
     return dataDictM;
 }
 
 @end
 
-@implementation GrowingReengageBuilder
+@implementation GrowingAdvertisingVisitBuilder
 
 - (void)readPropertyInTrackThread {
     [super readPropertyInTrackThread];
@@ -67,26 +84,25 @@
     _idfv = deviceInfo.idfv;
 }
 
-- (GrowingReengageBuilder * (^)(NSString *value))setIdfa {
+- (GrowingBaseEvent *)build {
+    return [[GrowingAdvertisingVisitEvent alloc] initWithBuilder:self];
+}
+
+- (NSString *)eventType {
+    return @"vst";
+}
+
+- (GrowingAdvertisingVisitBuilder *(^)(NSString *value))setIdfa {
     return ^(NSString *value) {
         self->_idfa = value;
         return self;
     };
 }
-- (GrowingReengageBuilder * (^)(NSString *value))setIdfv {
+- (GrowingAdvertisingVisitBuilder *(^)(NSString *value))setIdfv {
     return ^(NSString *value) {
         self->_idfv = value;
         return self;
     };
 }
-
-- (GrowingBaseEvent *)build {
-    return [[GrowingReengageEvent alloc] initWithBuilder:self];
-}
-
-- (NSString *)eventType {
-    return @"reengage";
-}
-
 
 @end

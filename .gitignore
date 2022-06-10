@@ -19,12 +19,11 @@ profile
 DerivedData
 .idea/
 
+# Swift Package Manager
+.swiftpm/
 
 Pods/
-Pods/
-Example/Pods/
 Example/Example.xcodeproj/xcshareddata/
-Growing/release
 
 release/
 

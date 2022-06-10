@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "DD86CED0-20FA-45C1-9E41-F922E6D698F1",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Example.xcodeproj",
+        "identifier" : "348D7CC9285197D100A65578",
+        "name" : "GrowingAdvertisingTests"
+      }
+    }
+  ],
+  "version" : 1
+}

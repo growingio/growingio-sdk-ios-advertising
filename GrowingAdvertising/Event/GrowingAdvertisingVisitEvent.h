@@ -1,6 +1,6 @@
 //
 // GrowingAdvertisingVisitEvent.h
-// GrowingAnalytics-0cad4c59
+// GrowingAdvertising
 //
 //  Created by sheng on 2021/5/21.
 //  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
@@ -17,20 +17,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-
-#import "GrowingVisitEvent.h"
+#import "GrowingBaseEvent.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class GrowingAdvertisingVisitBuilder;
 
-@interface GrowingAdvertisingVisitEvent : GrowingVisitEvent
+@interface GrowingAdvertisingVisitEvent : GrowingBaseEvent
 
-+ (GrowingAdvertisingVisitBuilder *_Nonnull)builder;
+@property(nonatomic, copy, readonly) NSString *idfa;
+@property(nonatomic, copy, readonly) NSString *idfv;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+
++ (GrowingAdvertisingVisitBuilder *)builder;
 
 @end
 
-@interface GrowingAdvertisingVisitBuilder : GrowingVisitBuilder
+@interface GrowingAdvertisingVisitBuilder : GrowingBaseBuilder
+
+@property(nonatomic, copy, readonly) NSString *idfa;
+@property(nonatomic, copy, readonly) NSString *idfv;
+
+// new set methods
+- (GrowingAdvertisingVisitBuilder * (^)(NSString *value))setIdfa;
+- (GrowingAdvertisingVisitBuilder * (^)(NSString *value))setIdfv;
 
 @end
 

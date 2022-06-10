@@ -1,6 +1,6 @@
 //
 // GrowingActivateEvent.h
-// GrowingAnalytics-0cad4c59
+// GrowingAdvertising
 //
 //  Created by sheng on 2021/5/21.
 //  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
@@ -17,20 +17,35 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingReengageEvent.h"
+#import "GrowingBaseEvent.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
 @class GrowingActivateBuilder;
 
-@interface GrowingActivateEvent : GrowingReengageEvent
+@interface GrowingActivateEvent : GrowingBaseEvent
 
-+ (GrowingActivateBuilder *_Nonnull)builder;
+@property (nonatomic, copy, readonly) NSString *idfa;
+@property (nonatomic, copy, readonly) NSString *idfv;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+
++ (GrowingActivateBuilder *)builder;
 
 @end
 
-@interface GrowingActivateBuilder : GrowingReengageBuilder
+@interface GrowingActivateBuilder : GrowingBaseBuilder
 
-- (GrowingActivateBuilder *_Nonnull (^)(NSDictionary *_Nonnull))setExtraParams;
+@property (nonatomic, copy, readonly) NSString *idfa;
+@property (nonatomic, copy, readonly) NSString *idfv;
+
+// new set methods
+- (GrowingActivateBuilder * (^)(NSString *value))setIdfa;
+- (GrowingActivateBuilder * (^)(NSString *value))setIdfv;
+
+// override
+- (GrowingActivateBuilder * (^)(NSDictionary *))setExtraParams;
 
 @end
 

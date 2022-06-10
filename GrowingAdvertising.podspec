@@ -1,14 +1,6 @@
-#
-# Be sure to run `pod lib lint GrowingIO.podspec' to ensure this is a
-# valid spec before submitting.
-#
-# Any lines starting with a # are optional, but their use is encouraged
-# To learn more about a Podspec see https://guides.cocoapods.org/syntax/podspec.html
-#
-
 Pod::Spec.new do |s|
   s.name             = 'GrowingAdvertising'
-  s.version          = '0.0.2'
+  s.version          = '0.0.3-beta'
   s.summary          = 'iOS SDK of GrowingIO.'
   s.description      = <<-DESC
 GrowingAdvertising具备采集广告事件，包括activate,reengage,vst
@@ -22,12 +14,11 @@ GrowingAdvertising具备采集广告事件，包括activate,reengage,vst
   s.ios.framework = 'WebKit'
   s.requires_arc = true
   s.default_subspec = "Core"
-  
+  s.pod_target_xcconfig = { 'HEADER_SEARCH_PATHS' => '"${PODS_TARGET_SRCROOT}" "${PODS_ROOT}/GrowingAnalytics"' }
+
   s.subspec 'Core' do |core|
       core.source_files = 'GrowingAdvertising/**/*{.h,.m,.c,.cpp,.mm}'
+      core.public_header_files = 'GrowingAdvertising/*.h'
       core.dependency 'GrowingAnalytics/TrackerCore'
-      core.dependency 'GrowingAnalytics/Network'
   end
-
-
 end

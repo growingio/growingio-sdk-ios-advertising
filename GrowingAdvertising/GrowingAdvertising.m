@@ -23,10 +23,8 @@
 
 #import "GrowingAdvertising/Event/GrowingActivateEvent.h"
 #import "GrowingAdvertising/Event/GrowingReengageEvent.h"
-#import "GrowingAdvertising/Event/GrowingAdvertisingVisitEvent.h"
 #import "GrowingAdvertising/Request/GrowingAdvertisingPreRequest.h"
 #import "GrowingAdvertising/Request/GrowingAdvertisingRequest.h"
-#import "GrowingAdvertising/Request/GrowingAdvertisingVstRequest.h"
 
 #import "GrowingTrackerCore/Public/GrowingEventNetworkService.h"
 #import "GrowingTrackerCore/Public/GrowingServiceManager.h"
@@ -38,14 +36,13 @@
 #import "GrowingTrackerCore/Helpers/NSDictionary+GrowingHelper.h"
 #import "GrowingTrackerCore/Helpers/NSString+GrowingHelper.h"
 #import "GrowingTrackerCore/Helpers/NSURL+GrowingHelper.h"
-#import "GrowingTrackerCore/Hook/GrowingAppLifecycle.h"
 #import "GrowingTrackerCore/Utils/GrowingDeviceInfo.h"
 #import "GrowingTrackerCore/DeepLink/GrowingDeepLinkHandler.h"
 #import "GrowingTrackerCore/Thirdparty/Logger/GrowingLogger.h"
 
 GrowingMod(GrowingAdvertising)
 
-@interface GrowingAdvertising () <GrowingDeepLinkHandlerProtocol, GrowingEventInterceptor, GrowingAppLifecycleDelegate>
+@interface GrowingAdvertising () <GrowingDeepLinkHandlerProtocol, GrowingEventInterceptor>
 
 @property (nonatomic, strong) WKWebView *wkWebView;
 @property (nonatomic, strong, readwrite) GrowingTrackConfiguration *configuration;
@@ -67,7 +64,6 @@ GrowingMod(GrowingAdvertising)
 
 - (void)growingModInit:(GrowingContext *)context {
     [[GrowingEventManager sharedInstance] addInterceptor:self];
-    [[GrowingAppLifecycle sharedInstance] addAppLifecycleDelegate:self];
     [[GrowingDeepLinkHandler sharedInstance] addHandlersObject:self];
     
     [self loadClipboardCompletion:^(NSDictionary *dict) {
@@ -375,29 +371,14 @@ GrowingMod(GrowingAdvertising)
 
 #pragma mark - GrowingEventInterceptor
 
-/// 由于vst 以及 reenage activate，发送地址和3.0不一致，需要另创建2个channel来发送
+/// 由于reengage activate，发送地址和3.0不一致，需要另创建channel来发送
 - (void)growingEventManagerChannels:(NSMutableArray<GrowingEventChannel *> *)channels {
-    [channels addObject:[GrowingEventChannel eventChannelWithEventTypes:@[@"vst"]
-                                                            urlTemplate:@"v3/%@/ios/pv?stm=%llu"
-                                                          isCustomEvent:NO]];
     [channels addObject:[GrowingEventChannel eventChannelWithEventTypes:@[@"reengage", @"activate"]
                                                             urlTemplate:@"app/%@/ios/ctvt"
                                                           isCustomEvent:NO]];
 }
 
-/// 拦截visit事件，并发出广告sdk的vst
-- (void)growingEventManagerEventWillBuild:(GrowingBaseBuilder *_Nullable)builder {
-    if (builder.eventType == GrowingEventTypeVisit) {
-        GrowingAdvertisingVisitBuilder *b = (GrowingAdvertisingVisitBuilder *)GrowingAdvertisingVisitEvent.builder.setTimestamp(builder.timestamp);
-        [self postEventBuilder:b];
-    }
-}
-
 - (id<GrowingRequestProtocol> _Nullable)growingEventManagerRequestWithChannel:(GrowingEventChannel *_Nullable)channel {
-    if ([channel.eventTypes indexOfObject:@"vst"] != NSNotFound) {
-        return [[GrowingAdvertisingVstRequest alloc] init];
-    }
-
     if ([channel.eventTypes indexOfObject:@"reengage"] != NSNotFound) {
         return [[GrowingAdvertisingRequest alloc] init];
     }

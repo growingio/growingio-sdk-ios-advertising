@@ -1,9 +1,9 @@
 //
-// GrowingAdvertisingRequest.m
+// GrowingAdEventRequest.m
 // GrowingAdvertising
 //
 //  Created by sheng on 2021/5/21.
-//  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
+//  Copyright (C) 2022 Beijing Yishu Technology Co., Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,18 +17,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingAdvertising/Request/GrowingAdvertisingRequest.h"
-#import "GrowingAdvertising/Request/Adapter/GrowingAdvertisingRequestAdapter.h"
-#import "GrowingAdvertising/Request/Adapter/GrowingAdvertisingRequestHeaderAdapter.h"
+#import "GrowingAdvertising/Request/GrowingAdEventRequest.h"
+#import "GrowingAdvertising/Request/Adapter/GrowingAdEventRequestAdapter.h"
+#import "GrowingAdvertising/Request/Adapter/GrowingAdRequestHeaderAdapter.h"
 #import "GrowingAdvertising/Public/GrowingAdvertising.h"
 
 #import "GrowingTrackerCore/Network/Request/Adapter/GrowingRequestAdapter.h"
 #import "GrowingTrackerCore/Utils/GrowingTimeUtil.h"
 #import "GrowingTrackerCore/Helpers/NSString+GrowingHelper.h"
 
-static NSString *const kGrowingTemporaryHost = @"https://t.growingio.com";
-
-@implementation GrowingAdvertisingRequest
+@implementation GrowingAdEventRequest
 @synthesize events;
 @synthesize outsize;
 @synthesize stm;
@@ -45,10 +43,7 @@ static NSString *const kGrowingTemporaryHost = @"https://t.growingio.com";
 }
 
 - (NSURL *)absoluteURL {
-    NSString *baseUrl = [[GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost
-                            isEqualToString:kGrowingDefaultDataCollectionServerHost]
-                            ? kGrowingTemporaryHost
-                            : [GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost;
+    NSString *baseUrl = @"https://t.growingio.com";
     ;
     if (!baseUrl.length) {
         return nil;
@@ -58,7 +53,7 @@ static NSString *const kGrowingTemporaryHost = @"https://t.growingio.com";
 }
 
 - (NSString *)path {
-    NSString *accountId = [GrowingAdvertising sharedInstance].configuration.projectId ?: @"";
+    NSString *accountId = [GrowingAdvertising sharedInstance].projectId ?: @"";
     NSString *path = [NSString stringWithFormat:@"app/%@/ios/ctvt", accountId];
     return path;
 }
@@ -66,10 +61,9 @@ static NSString *const kGrowingTemporaryHost = @"https://t.growingio.com";
 - (NSArray<id<GrowingRequestAdapter>> *)adapters {
     // on 2.0 server, content-type must be application/octet-stream
     NSDictionary *headers = @{@"Content-Type" : @"application/octet-stream"};
-    GrowingAdvertisingRequestHeaderAdapter *basicHeaderAdapter = [GrowingAdvertisingRequestHeaderAdapter adapterWithRequest:self
-                                                                                                                     header:headers];
+    GrowingAdRequestHeaderAdapter *basicHeaderAdapter = [GrowingAdRequestHeaderAdapter adapterWithRequest:self header:headers];
     GrowingRequestMethodAdapter *methodAdapter = [GrowingRequestMethodAdapter adapterWithRequest:self];
-    GrowingAdvertisingRequestAdapter *bodyAdapter = [GrowingAdvertisingRequestAdapter adapterWithRequest:self];
+    GrowingAdEventRequestAdapter *bodyAdapter = [GrowingAdEventRequestAdapter adapterWithRequest:self];
     NSMutableArray *adapters = [NSMutableArray arrayWithObjects:basicHeaderAdapter, methodAdapter, bodyAdapter, nil];
     return adapters;
 }

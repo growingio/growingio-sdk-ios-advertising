@@ -1,9 +1,9 @@
 //
-// GrowingAdvertisingRequest.h
-// GrowingAdvertising
+//  GrowingAdRequestHeaderAdapter.h
+//  GrowingAdvertising
 //
-//  Created by sheng on 2021/5/21.
-//  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
+//  Created by YoloMao on 2022/6/9.
+//  Copyright (C) 2022 Beijing Yishu Technology Co., Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GrowingAdvertisingRequest : NSObject <GrowingRequestProtocol>
+@interface GrowingAdRequestHeaderAdapter : NSObject <GrowingRequestAdapter>
+
++ (instancetype)adapterWithRequest:(id <GrowingRequestProtocol>)request
+                            header:(nullable NSDictionary *)header;
 
 @end
 

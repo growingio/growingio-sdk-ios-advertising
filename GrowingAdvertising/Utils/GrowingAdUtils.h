@@ -1,8 +1,8 @@
 //
-//  GrowingAdvertisingRequestAdapter.h
+//  GrowingAdUtils.h
 //  GrowingAdvertising
 //
-//  Created by YoloMao on 2022/6/9.
+//  Created by YoloMao on 2022/6/22.
 //  Copyright (C) 2022 Beijing Yishu Technology Co., Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,18 @@
 //  limitations under the License.
 
 #import <Foundation/Foundation.h>
-#import "GrowingRequestProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GrowingAdvertisingRequestAdapter : NSObject <GrowingRequestAdapter>
+@interface GrowingAdUtils : NSObject
+
++ (BOOL)isGrowingIOUrl:(NSURL *)url;
+
++ (BOOL)isShortChainUlink:(NSURL *)url;
+
++ (NSString *)URLDecodedString:(NSString *)urlString;
+
++ (NSDictionary *)dictFromPasteboard:(NSString *)clipboardString;
 
 @end
 

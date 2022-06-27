@@ -1,5 +1,5 @@
 //
-// GrowingActivateEvent.h
+// GrowingAdEventRequest.h
 // GrowingAdvertising
 //
 //  Created by sheng on 2021/5/21.
@@ -17,35 +17,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingBaseEvent.h"
+#import <Foundation/Foundation.h>
+#import "GrowingRequestProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class GrowingActivateBuilder;
-
-@interface GrowingActivateEvent : GrowingBaseEvent
-
-@property (nonatomic, copy, readonly) NSString *idfa;
-@property (nonatomic, copy, readonly) NSString *idfv;
-
-- (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)new NS_UNAVAILABLE;
-
-+ (GrowingActivateBuilder *)builder;
-
-@end
-
-@interface GrowingActivateBuilder : GrowingBaseBuilder
-
-@property (nonatomic, copy, readonly) NSString *idfa;
-@property (nonatomic, copy, readonly) NSString *idfv;
-
-// new set methods
-- (GrowingActivateBuilder * (^)(NSString *value))setIdfa;
-- (GrowingActivateBuilder * (^)(NSString *value))setIdfv;
-
-// override
-- (GrowingActivateBuilder * (^)(NSDictionary *))setExtraParams;
+@interface GrowingAdEventRequest : NSObject <GrowingRequestProtocol>
 
 @end
 

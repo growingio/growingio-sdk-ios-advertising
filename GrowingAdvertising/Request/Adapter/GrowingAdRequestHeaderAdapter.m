@@ -1,5 +1,5 @@
 //
-//  GrowingAdvertisingRequestHeaderAdapter.m
+//  GrowingAdRequestHeaderAdapter.m
 //  GrowingAdvertising
 //
 //  Created by YoloMao on 2022/6/9.
@@ -17,25 +17,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingAdvertising/Request/Adapter/GrowingAdvertisingRequestHeaderAdapter.h"
+#import "GrowingAdvertising/Request/Adapter/GrowingAdRequestHeaderAdapter.h"
 #import "GrowingTrackerCore/Utils/GrowingTimeUtil.h"
 
-@interface GrowingAdvertisingRequestHeaderAdapter ()
+@interface GrowingAdRequestHeaderAdapter ()
 
 @property (nonatomic, weak) id <GrowingRequestProtocol> request;
 @property (nonatomic, copy) NSDictionary *header;
 
 @end
 
-@implementation GrowingAdvertisingRequestHeaderAdapter
+@implementation GrowingAdRequestHeaderAdapter
 
 + (instancetype)adapterWithRequest:(id <GrowingRequestProtocol>)request {
     return [self adapterWithRequest:request header:nil];
 }
 
 + (instancetype)adapterWithRequest:(id <GrowingRequestProtocol>)request
-                            header:(NSDictionary * _Nullable)header {
-    GrowingAdvertisingRequestHeaderAdapter *adapter = [[self alloc] init];
+                            header:(nullable NSDictionary *)header {
+    GrowingAdRequestHeaderAdapter *adapter = [[self alloc] init];
     adapter.request = request;
     adapter.header = header;
     return adapter;
@@ -44,7 +44,7 @@
 - (NSMutableURLRequest *)adaptedURLRequest:(NSMutableURLRequest *)request {
     NSMutableURLRequest *needAdaptReq = request;
     
-    [needAdaptReq setValue:[NSString stringWithFormat:@"%lld",[GrowingTimeUtil currentTimeMillis]]
+    [needAdaptReq setValue:[NSString stringWithFormat:@"%lld", [GrowingTimeUtil currentTimeMillis]]
         forHTTPHeaderField:@"X-Timestamp"];
     [needAdaptReq setValue:@"application/json" forHTTPHeaderField:@"Accept"];
     

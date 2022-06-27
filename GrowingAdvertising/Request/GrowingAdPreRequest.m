@@ -1,9 +1,9 @@
 //
-// GrowingDeepLinkRequest.m
+// GrowingAdPreRequest.m
 // GrowingAdvertising
 //
 //  Created by sheng on 2021/5/12.
-//  Copyright (C) 2017 Beijing Yishu Technology Co., Ltd.
+//  Copyright (C) 2022 Beijing Yishu Technology Co., Ltd.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,27 +17,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingAdvertising/Request/GrowingAdvertisingPreRequest.h"
-#import "GrowingAdvertising/Request/Adapter/GrowingAdvertisingRequestHeaderAdapter.h"
+#import "GrowingAdvertising/Request/GrowingAdPreRequest.h"
+#import "GrowingAdvertising/Request/Adapter/GrowingAdRequestHeaderAdapter.h"
 #import "GrowingAdvertising/Public/GrowingAdvertising.h"
 
 #import "GrowingTrackerCore/Network/Request/Adapter/GrowingRequestAdapter.h"
 #import "GrowingTrackerCore/Utils/GrowingDeviceInfo.h"
 #import "GrowingTrackerCore/Helpers/NSString+GrowingHelper.h"
 
-@implementation GrowingAdvertisingPreRequest
-
-static NSString *const kGrowingTemporaryHost = @"https://t.growingio.com";
+@implementation GrowingAdPreRequest
 
 - (GrowingHTTPMethod)method {
     return GrowingHTTPMethodGET;
 }
 
 - (NSURL *)absoluteURL {
-    NSString *baseUrl = [[GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost
-                            isEqualToString:kGrowingDefaultDataCollectionServerHost]
-                            ? kGrowingTemporaryHost
-                            : [GrowingAdvertising sharedInstance].configuration.dataCollectionServerHost;
+    NSString *baseUrl = @"https://t.growingio.com";
     if (!baseUrl.length) {
         return nil;
     }
@@ -46,18 +41,20 @@ static NSString *const kGrowingTemporaryHost = @"https://t.growingio.com";
 }
 
 - (NSString *)path {
-    NSString *accountId = [GrowingAdvertising sharedInstance].configuration.projectId ?: @"";
+    NSString *accountId = [GrowingAdvertising sharedInstance].projectId ?: @"";
     NSString *bundleId = [GrowingDeviceInfo currentDeviceInfo].bundleID;
     NSString *path = [NSString stringWithFormat:@"app/at6/%@/ios/%@/%@/%@", self.isManual ? @"inapp" : @"defer",
-                                                accountId, bundleId, self.hashId];
+                                                                            accountId,
+                                                                            bundleId,
+                                                                            self.hashId];
     return path;
 }
 
 - (NSArray<id<GrowingRequestAdapter>> *)adapters {
     NSDictionary *headers = @{@"Content-Type" : @"application/json",
                               @"User-Agent" : self.userAgent};
-    GrowingAdvertisingRequestHeaderAdapter *basicHeaderAdapter = [GrowingAdvertisingRequestHeaderAdapter adapterWithRequest:self
-                                                                                                                     header:headers];
+    GrowingAdRequestHeaderAdapter *basicHeaderAdapter = [GrowingAdRequestHeaderAdapter adapterWithRequest:self
+                                                                                                   header:headers];
     GrowingRequestMethodAdapter *methodAdapter = [GrowingRequestMethodAdapter adapterWithRequest:self];
     NSMutableArray *adapters = [NSMutableArray arrayWithObjects:basicHeaderAdapter, methodAdapter, nil];
     return adapters;

@@ -1,5 +1,5 @@
 //
-//  GrowingAdvertisingRequestAdapter.m
+//  GrowingAdEventRequestAdapter.m
 //  GrowingAdvertising
 //
 //  Created by YoloMao on 2022/6/9.
@@ -17,25 +17,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#import "GrowingAdvertising/Request/Adapter/GrowingAdvertisingRequestAdapter.h"
+#import "GrowingAdvertising/Request/Adapter/GrowingAdEventRequestAdapter.h"
 #import "GrowingTrackerCore/Helpers/NSData+GrowingHelper.h"
 
-@interface GrowingAdvertisingRequestAdapter ()
+@interface GrowingAdEventRequestAdapter ()
 
 @property (nonatomic, weak) id <GrowingRequestProtocol> request;
 
 @end
 
-@implementation GrowingAdvertisingRequestAdapter
+@implementation GrowingAdEventRequestAdapter
 
 + (instancetype)adapterWithRequest:(id <GrowingRequestProtocol>)request {
-    GrowingAdvertisingRequestAdapter *adapter = [[self alloc] init];
+    GrowingAdEventRequestAdapter *adapter = [[self alloc] init];
     adapter.request = request;
     return adapter;
 }
 
 - (NSMutableURLRequest *)adaptedURLRequest:(NSMutableURLRequest *)request {
-    if (self.request.events.length == 0) {
+    if (![self.request respondsToSelector:@selector(events)] || self.request.events.length == 0) {
         return request;
     }
     
@@ -48,7 +48,9 @@
     @autoreleasepool {
         // jsonString malloc to much
         JSONData = [JSONData growingHelper_LZ4String];
-        JSONData = [JSONData growingHelper_xorEncryptWithHint:(self.request.stm & 0xFF)];
+        if ([self.request respondsToSelector:@selector(stm)]) {
+            JSONData = [JSONData growingHelper_xorEncryptWithHint:(self.request.stm & 0xFF)];
+        }
     }
     needAdaptReq.HTTPBody = JSONData;
     return needAdaptReq;

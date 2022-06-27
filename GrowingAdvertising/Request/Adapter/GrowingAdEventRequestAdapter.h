@@ -1,5 +1,5 @@
 //
-//  GrowingAdvertisingRequestHeaderAdapter.h
+//  GrowingAdEventRequestAdapter.h
 //  GrowingAdvertising
 //
 //  Created by YoloMao on 2022/6/9.
@@ -22,10 +22,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GrowingAdvertisingRequestHeaderAdapter : NSObject <GrowingRequestAdapter>
-
-+ (instancetype)adapterWithRequest:(id <GrowingRequestProtocol>)request
-                            header:(NSDictionary * _Nullable)header;
+@interface GrowingAdEventRequestAdapter : NSObject <GrowingRequestAdapter>
 
 @end
 

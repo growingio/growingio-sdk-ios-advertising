@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'GrowingAdvertising'
-  s.version          = '0.0.3-beta'
+  s.version          = '1.0.0-beta'
   s.summary          = 'iOS SDK of GrowingIO.'
   s.description      = <<-DESC
 GrowingAdvertising具备采集广告事件，包括activate,reengage

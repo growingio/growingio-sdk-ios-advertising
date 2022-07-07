@@ -1,15 +1,26 @@
 //
 //  AppDelegate.m
-//  Example
+//  GrowingAdvertising
 //
-//  Created by sheng on 2021/5/27.
+//  Created by YoloMao on 2022/6/27.
+//  Copyright (C) 2022 Beijing Yishu Technology Co., Ltd.
 //
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
 
 #import "AppDelegate.h"
-#import <AppTrackingTransparency/AppTrackingTransparency.h>
-#import <GrowingToolsKit/GrowingToolsKit.h>
+@import GrowingAnalytics;
 #import "GrowingAdvertising.h"
-#import "GrowingAutotracker.h"
 
 static NSString *const kGrowingProjectId = @"bc675c65b3b0290e";
 
@@ -19,10 +30,10 @@ static NSString *const kGrowingProjectId = @"bc675c65b3b0290e";
 
 @implementation AppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // 初始化GioKit
-    [GrowingToolsKit start];
 
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    // Override point for customization after application launch.
+    
     // 初始化GrowingAdvertising
     GrowingAdvertConfiguration *adConfiguration = [GrowingAdvertConfiguration configurationWithProjectId:@"0a1b4118dd954ec3bcc69da5138bdb96"
                                                                                               urlScheme:@"growing.530c8231345c492d"];
@@ -56,48 +67,28 @@ static NSString *const kGrowingProjectId = @"bc675c65b3b0290e";
     return topController;
 }
 
-#pragma mark - UIApplicationDelegate
 
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-    NSLog(@"Application - applicationWillEnterForeground");
+#pragma mark - UISceneSession lifecycle
+
+
+- (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession options:(UISceneConnectionOptions *)options {
+    // Called when a new scene session is being created.
+    // Use this method to select a configuration to create the new scene with.
+    return [[UISceneConfiguration alloc] initWithName:@"Default Configuration" sessionRole:connectingSceneSession.role];
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-    NSLog(@"Application - applicationDidBecomeActive");
 
-    // 如若您需要使用IDFA作为访问用户ID，参考如下代码
-    /**
-     // 调用AppTrackingTransparency相关实现请在ApplicationDidBecomeActive之后，适配iOS 15
-     // 参考: https:developer.apple.com/forums/thread/690607?answerId=688798022#688798022
-    if (@available(iOS 14, *)) {
-        [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
-            // 初始化SDK
-        }];
-    } else {
-        // 初始化SDK
-    }
-     */
-}
-
-- (void)applicationWillResignActive:(UIApplication *)application {
-    NSLog(@"Application - applicationWillResignActive");
-}
-
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    NSLog(@"Application - applicationDidEnterBackground");
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application {
-    NSLog(@"Application - applicationWillTerminate");
+- (void)application:(UIApplication *)application didDiscardSceneSessions:(NSSet<UISceneSession *> *)sceneSessions {
+    // Called when the user discards a scene session.
+    // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
+    // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
 }
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
     return YES;
 }
 
-// Universal Link
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *_Nullable))restorationHandler {
-    restorationHandler(nil);
     return YES;
 }
 

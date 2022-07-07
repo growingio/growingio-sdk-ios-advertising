@@ -2,7 +2,7 @@
   "configurations" : [
     {
       "id" : "DD86CED0-20FA-45C1-9E41-F922E6D698F1",
-      "name" : "Configuration 1",
+      "name" : "GrowingAdvertisingTests",
       "options" : {
 
       }
@@ -17,6 +17,20 @@
         "containerPath" : "container:Example.xcodeproj",
         "identifier" : "348D7CC9285197D100A65578",
         "name" : "GrowingAdvertisingTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Example.xcodeproj",
+        "identifier" : "34AA722A2869A3DB00100BDD",
+        "name" : "GrowingAdvertisingUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Example.xcodeproj",
+        "identifier" : "34AA72392869A40900100BDD",
+        "name" : "GrowingAdvertisingiOS13UITests"
       }
     }
   ],

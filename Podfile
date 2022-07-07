@@ -20,3 +20,10 @@ target 'GrowingAdvertisingTests' do
    pod 'GrowingAnalytics/Autotracker'
    pod 'GrowingAdvertising', :path => './'
 end
+
+target 'ExampleiOS13' do
+  project 'Example/Example'
+  pod 'GrowingAnalytics/Autotracker'
+  pod 'GrowingAdvertising', :path => './'
+  pod 'GrowingToolsKit'
+end

@@ -44,6 +44,6 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 13' \
           -enableCodeCoverage YES
 
-      - name: Upload coverage to Codecov
-        if: always()
-        run: bash <(curl -s https://codecov.io/bash)
+      # - name: Upload coverage to Codecov
+      #   if: always()
+      #   run: bash <(curl -s https://codecov.io/bash)

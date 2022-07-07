@@ -21,7 +21,7 @@ GrowingIO Advertising
 
 ## 集成文档
 
-- [广告SDK文档](https://github.com/growingio/growingio-sdk-ios-advertising/wiki/%E5%B9%BF%E5%91%8ASDK%E9%9B%86%E6%88%90%E6%96%87%E6%A1%A3)
+- [广告SDK集成](https://github.com/growingio/growingio-sdk-ios-advertising/wiki/%E5%B9%BF%E5%91%8A-SDK-%E9%9B%86%E6%88%90)
 
 ## License
 
